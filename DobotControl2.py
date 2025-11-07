@@ -9,24 +9,29 @@ if state == dType.DobotConnect.DobotConnect_NoError:
 
     # Define your waypoints (X, Y, Z, R)
     waypoints = [
-        (60.3, -204.1, 30.9, -34.9),
-        (68.3, -194, -48.9, -32),
-        (79.3, -225.9, 85.1, -32.1),
-        (220.9, -93.6, 86.2, 15.6),
-        (228.7, -73.8, -30.5, 20.7),
-        (65.5, -244.1, 66.2, -36.4),
-        (-123.4, -211.8, 77.7, -81.6),
-        (-100.1, -227.7, -46.6, -75.1),
-        (-82, -241.9, 65.9, -70.1),
-        (60.3, -204.1, 30.9, -34.9)  # back to start
+        (5.2, -212.1, -52.8, -49.96),  # Approach wafer
+        (5.2, -212.1, -63.76, -49.96),     # Lower to pick
+        (5.2, -212.1, 58, -49.96),  # Lift after pick
+        (-87, -193, 58, -75),   # Move to place
+        (-87, -193, -63, -75),  # Lower to place
+        (-87, -193, 63, -75),  # Lift after place
+        (25, -176, -20, -43.4)   # back to start
     ]
 
     # Queue moves through all waypoints
-    for (x, y, z, r) in waypoints:
+    for i, (x, y, z, r) in enumerate(waypoints):
         lastIndex = dType.SetPTPCmd(api,
                                     dType.PTPMode.PTPMOVLXYZMode,
                                     x, y, z, r,
                                     isQueued=1)[0]
+
+        # Activate suction after reaching pick position
+        if i == 1:
+            dType.SetEndEffectorSuctionCup(api, 1, 1, 1)
+
+        # Deactivate suction after reaching place position
+        if i == 4:
+            dType.SetEndEffectorSuctionCup(api, 1, 0, 1)
 
     # Start execution
     dType.SetQueuedCmdStartExec(api)
